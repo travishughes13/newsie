@@ -32,9 +32,9 @@ db.once("open", function() {
 // Routes
 // ======
 app.get("/scrape", function(req, res) {
-  request("http://www.echojs.com/", function(error, response, html) {
+  request("https://nytimes.com", function(error, response, html) {
     var $ = cheerio.load(html);
-    $("article h2").each(function(i, element) {
+    $("h2").each(function(i, element) {
 
       var result = {};
 
@@ -83,18 +83,18 @@ app.get("/articles/:id", function(req, res) {
 
 app.post("/articles/:id", function(req, res) {
   var newNote = new Note(req.body);
-
-  newNote.save(function(err, doc) {
-    if (err) {
-      res.send(err);
+  newNote.save(function(error, doc) {
+    if (error) {
+      console.log(error);
     }
     else {
-      Article.findOneAndUpdate({"_id": req.params.id}, { $push: { "notes": doc._id } }, {new: true}, function(err, newdoc) {
+      Article.findOneAndUpdate({ "_id": req.params.id }, { "note": doc._id })
+      .exec(function(err, doc) {
         if (err) {
-          res.send(err);
+          console.log(err);
         }
         else {
-          res.send(newdoc);
+          res.send(doc);
         }
       });
     }
